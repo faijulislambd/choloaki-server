@@ -28,6 +28,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
     const userCollection = client.db("choloakiDB").collection("users");
+    const classCollection = client.db("choloakiDB").collection("classes");
 
     //JWT token post
     app.post("/jwt", (req, res) => {
@@ -40,11 +41,6 @@ async function run() {
     app.get("/instructors", async (req, res) => {
       let query = { role: "instructor" };
       let sortby = { _id: -1 };
-
-      //For Pagination
-      // const page = parseInt(req.query.page) || 0;
-      // const limit = parseInt(req.query.limit) || 20;
-      // const skip = page * limit;
 
       //Query for Name wise data
       if (req.query?.toy_name) {
@@ -62,13 +58,31 @@ async function run() {
         sortby = { toy_price: req.query.price };
       }
 
-      // const result = await toysCollection
-      //   .find(query)
-      //   .skip(skip)
-      //   .limit(limit)
-      //   .sort(sortby)
-      //   .toArray();
       const result = await userCollection.find(query).sort(sortby).toArray();
+      res.send(result);
+    });
+    //Getting data from db
+    app.get("/classes", async (req, res) => {
+      let query = {};
+      let sortby = { _id: -1 };
+
+      //Query for Name wise data
+      if (req.query?.class_name) {
+        const toyNameSearch = new RegExp(req.query.class_name, "i");
+        query = { name: { $regex: toyNameSearch } };
+      }
+
+      //Query for email wise data
+      if (req.query?.email) {
+        query = { email: req.query.email };
+      }
+
+      //Query for Price Sort
+      if (req.query?.price) {
+        sortby = { price: req.query.price };
+      }
+
+      const result = await classCollection.find(query).sort(sortby).toArray();
       res.send(result);
     });
 
