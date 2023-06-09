@@ -61,6 +61,7 @@ async function run() {
       const result = await userCollection.find(query).sort(sortby).toArray();
       res.send(result);
     });
+
     //Getting data from db
     app.get("/classes", async (req, res) => {
       let query = {};
@@ -83,6 +84,13 @@ async function run() {
       }
 
       const result = await classCollection.find(query).sort(sortby).toArray();
+      res.send(result);
+    });
+
+    // User Upload
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const result = await userCollection.insertOne(user);
       res.send(result);
     });
 
