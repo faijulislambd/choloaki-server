@@ -88,6 +88,19 @@ async function run() {
       res.send(result);
     });
 
+    // Delete Cart Item
+    app.delete("/cart/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await cartCollection.deleteOne(query);
+      if (result.deletedCount === 1) {
+        console.log("Removed Cart Item");
+      } else {
+        console.log("No Items Deleted");
+      }
+      res.send(result);
+    });
+    // Seat Patch
     app.patch("/classes/seat/:id", async (req, res) => {
       const id = req.params.id;
       const seat = req.body.seats;
@@ -98,6 +111,15 @@ async function run() {
         },
       };
       const result = await classCollection.updateOne(filter, updatedClass);
+      res.send(result);
+    });
+    // Seat Get
+    app.get("/classes/seat/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await classCollection.findOne(query, {
+        projection: { seats: 1 },
+      });
       res.send(result);
     });
 
