@@ -29,6 +29,7 @@ async function run() {
     // await client.connect();
     const userCollection = client.db("choloakiDB").collection("users");
     const classCollection = client.db("choloakiDB").collection("classes");
+    const cartCollection = client.db("choloakiDB").collection("cart");
 
     //JWT token post
     app.post("/jwt", (req, res) => {
@@ -41,22 +42,6 @@ async function run() {
     app.get("/instructors", async (req, res) => {
       let query = { role: "instructor" };
       let sortby = { _id: -1 };
-
-      //Query for Name wise data
-      if (req.query?.toy_name) {
-        const toyNameSearch = new RegExp(req.query.toy_name, "i");
-        query = { toy_name: { $regex: toyNameSearch } };
-      }
-
-      //Query for category wise data
-      if (req.query?.category) {
-        query = { category: req.query.category };
-      }
-
-      //Query for Price Sort
-      if (req.query?.price) {
-        sortby = { toy_price: req.query.price };
-      }
 
       const result = await userCollection.find(query).sort(sortby).toArray();
       res.send(result);
@@ -82,6 +67,24 @@ async function run() {
         return res.send({ message: "User Already Exists" });
       }
       const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
+
+    // Cart Upload
+    app.post("/cart", async (req, res) => {
+      const cartItem = req.body;
+      const result = await cartCollection.insertOne(cartItem);
+      res.send(result);
+    });
+
+    //Get cart
+    app.get("/cart", async (req, res) => {
+      const email = req.query.email;
+      if (!email) {
+        res.send([]);
+      }
+      const query = { email: email };
+      const result = await cartCollection.find(query).toArray();
       res.send(result);
     });
 
