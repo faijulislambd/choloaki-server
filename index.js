@@ -88,6 +88,19 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/classes/seat/:id", async (req, res) => {
+      const id = req.params.id;
+      const seat = req.body.seats;
+      const filter = { _id: new ObjectId(id) };
+      const updatedClass = {
+        $set: {
+          seats: seat,
+        },
+      };
+      const result = await classCollection.updateOne(filter, updatedClass);
+      res.send(result);
+    });
+
     app.get("/mytoys", async (req, res) => {
       let mysortby = { _id: -1 };
       let myquery = {};
