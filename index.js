@@ -62,26 +62,12 @@ async function run() {
       res.send(result);
     });
 
-    //Getting data from db
-    app.get("/classes", async (req, res) => {
+    //Getting approved classes for public
+    app.get("/classes/approved", async (req, res) => {
       let query = {};
       let sortby = { _id: -1 };
 
-      //Query for Name wise data
-      if (req.query?.class_name) {
-        const toyNameSearch = new RegExp(req.query.class_name, "i");
-        query = { name: { $regex: toyNameSearch } };
-      }
-
-      //Query for email wise data
-      if (req.query?.email) {
-        query = { email: req.query.email };
-      }
-
-      //Query for Price Sort
-      if (req.query?.price) {
-        sortby = { price: req.query.price };
-      }
+      query = { status: "approved" };
 
       const result = await classCollection.find(query).sort(sortby).toArray();
       res.send(result);
