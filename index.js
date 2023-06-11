@@ -70,6 +70,26 @@ async function run() {
       res.send(result);
     });
 
+    //Get Users
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
+    //Users Role Change
+    app.patch("/users/role/:id", async (req, res) => {
+      const id = req.params.id;
+      const role = req.body.role;
+      const filter = { _id: new ObjectId(id) };
+      const updatedRole = {
+        $set: {
+          role: role,
+        },
+      };
+      const result = await userCollection.updateOne(filter, updatedRole);
+      res.send(result);
+    });
+
     // Cart Upload
     app.post("/cart", async (req, res) => {
       const cartItem = req.body;
@@ -110,6 +130,7 @@ async function run() {
           seats: seat,
         },
       };
+      console.log(seat);
       const result = await classCollection.updateOne(filter, updatedClass);
       res.send(result);
     });
