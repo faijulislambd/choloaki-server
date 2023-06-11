@@ -58,6 +58,25 @@ async function run() {
       res.send(result);
     });
 
+    //Getting class of specific teacher
+    app.get("/teacher/classes", async (req, res) => {
+      let query = {};
+      const email = req.query.email;
+      let sortby = { _id: -1 };
+
+      query = { instructor_email: email };
+
+      const result = await classCollection.find(query).sort(sortby).toArray();
+      res.send(result);
+    });
+
+    //Getting all classes
+    app.get("/classes", async (req, res) => {
+      let sortby = { _id: -1 };
+      const result = await classCollection.find().sort(sortby).toArray();
+      res.send(result);
+    });
+
     // User Upload
     app.post("/users", async (req, res) => {
       const user = req.body;
