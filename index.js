@@ -184,6 +184,46 @@ async function run() {
       res.send(result);
     });
 
+    // check admin
+    app.get("/users/admin/:email", async (req, res) => {
+      const email = req.params.email;
+
+      // if (req.decoded.email !== email) {
+      //   res.send({ admin: false });
+      // }
+
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      const result = { admin: user?.role === "admin" };
+      res.send(result);
+    });
+    // check instructor
+    app.get("/users/instructor/:email", async (req, res) => {
+      const email = req.params.email;
+
+      // if (req.decoded.email !== email) {
+      //   res.send({ admin: false });
+      // }
+
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      const result = { instructor: user?.role === "instructor" };
+      res.send(result);
+    });
+    // check student
+    app.get("/users/student/:email", async (req, res) => {
+      const email = req.params.email;
+
+      // if (req.decoded.email !== email) {
+      //   res.send({ admin: false });
+      // }
+
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      const result = { student: user?.role === "student" };
+      res.send(result);
+    });
+
     app.get("/mytoys", async (req, res) => {
       let mysortby = { _id: -1 };
       let myquery = {};
