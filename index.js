@@ -91,6 +91,13 @@ async function run() {
       res.send(result);
     });
 
+    // User New Class
+    app.post("/teacher/new-class", async (req, res) => {
+      const cls = req.body;
+      const result = await classCollection.insertOne(cls);
+      res.send(result);
+    });
+
     // User Upload
     app.post("/users", async (req, res) => {
       const user = req.body;
