@@ -71,9 +71,23 @@ async function run() {
     });
 
     //Getting all classes
-    app.get("/classes", async (req, res) => {
+    app.get("/admin/classes", async (req, res) => {
       let sortby = { _id: -1 };
       const result = await classCollection.find().sort(sortby).toArray();
+      res.send(result);
+    });
+
+    //Class status update
+    app.patch("/admin/class/status/:id", async (req, res) => {
+      const id = req.params.id;
+      const status = req.body.status;
+      const filter = { _id: new ObjectId(id) };
+      const updatedStatus = {
+        $set: {
+          status: status,
+        },
+      };
+      const result = await classCollection.updateOne(filter, updatedStatus);
       res.send(result);
     });
 
@@ -96,7 +110,7 @@ async function run() {
     });
 
     //Users Role Change
-    app.patch("/users/role/:id", async (req, res) => {
+    app.patch("admin/users/role/:id", async (req, res) => {
       const id = req.params.id;
       const role = req.body.role;
       const filter = { _id: new ObjectId(id) };
