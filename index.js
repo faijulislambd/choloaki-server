@@ -181,6 +181,20 @@ async function run() {
       res.send(result);
     });
 
+    // Feedback To Class
+    app.patch("/admin/feedback/:id", async (req, res) => {
+      const id = req.params.id;
+      const feedback = req.body.feedback;
+      const filter = { _id: new ObjectId(id) };
+      const updatedFeedback = {
+        $set: {
+          feedback: feedback,
+        },
+      };
+      const result = await classCollection.updateOne(filter, updatedFeedback);
+      res.send(result);
+    });
+
     //Class status update
     app.patch("/admin/class/status/:id", async (req, res) => {
       const id = req.params.id;
@@ -217,8 +231,9 @@ async function run() {
     //Get Users
     app.get("/users", verifyJWT, verifyAdmin, async (req, res) => {
       const result = await userCollection.find().toArray();
+      const email = req.query.email;
       if (req.decoded.email !== email) {
-        res.send({ student: false });
+        res.send({ admin: false });
       }
       res.send(result);
     });
