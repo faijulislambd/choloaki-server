@@ -341,6 +341,23 @@ async function run() {
       }
       res.send(result);
     });
+
+    // Payment Intent
+    app.post("/create-payment-intent", verifyJWT, async (req, res) => {
+      const { price } = req.body;
+      const amount = price * 100;
+      const amountFixed = parseInt(amount.toFixed(2));
+      if (amountFixed > 0) {
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: amountFixed,
+          currency: "usd",
+          payment_method_types: ["card"],
+        });
+        res.send({
+          clientSecret: paymentIntent.client_secret,
+        });
+      }
+    });
     // Seat Patch
     app.patch("/classes/seat/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
