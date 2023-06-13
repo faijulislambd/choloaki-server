@@ -52,6 +52,7 @@ async function run() {
     const userCollection = client.db("choloakiDB").collection("users");
     const classCollection = client.db("choloakiDB").collection("classes");
     const cartCollection = client.db("choloakiDB").collection("cart");
+    const paymentsCollection = client.db("choloakiDB").collection("payments");
 
     //JWT token post
     app.post("/jwt", (req, res) => {
@@ -358,6 +359,19 @@ async function run() {
         });
       }
     });
+
+    //Payment to db
+    app.post("/payments", verifyJWT, async (req, res) => {
+      const payment = req.body;
+      const inserted = await paymentsCollection.insertOne(payment);
+
+      const query = {
+        _id: { $in: payment.cart_ids.map((id) => new ObjectId(id)) },
+      };
+      const deleted = await cartCollection.deleteMany(query);
+      res.send({ inserted, deleted });
+    });
+
     // Seat Patch
     app.patch("/classes/seat/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
