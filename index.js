@@ -388,6 +388,14 @@ async function run() {
       res.send({ inserted, deleted, updated });
     });
 
+    // Get Payment History
+    app.get("/payments/:email", verifyJWT, verifyStudent, async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await paymentsCollection.find(query).toArray();
+      res.send(result);
+    });
+
     // Seat Patch
     app.patch("/classes/seat/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
