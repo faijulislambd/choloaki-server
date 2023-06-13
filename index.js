@@ -4,7 +4,7 @@ require("dotenv").config();
 const app = express();
 const cors = require("cors");
 const port = process.env.PORT || 5000;
-
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 //Middleware
 app.use(cors());
 app.use(express.json());
@@ -330,7 +330,7 @@ async function run() {
     });
 
     // Delete Cart Item
-    app.delete("/cart/:id", verifyJWT, verifyStudent, async (req, res) => {
+    app.delete("/cart/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await cartCollection.deleteOne(query);
@@ -362,6 +362,14 @@ async function run() {
       const result = await classCollection.findOne(query, {
         projection: { seats: 1 },
       });
+      res.send(result);
+    });
+
+    // delete Class
+    app.delete("/teacher/class/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await classCollection.deleteOne(query);
       res.send(result);
     });
 
