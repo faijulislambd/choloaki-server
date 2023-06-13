@@ -365,11 +365,27 @@ async function run() {
       const payment = req.body;
       const inserted = await paymentsCollection.insertOne(payment);
 
-      const query = {
+      const deleteQuery = {
         _id: { $in: payment.cart_ids.map((id) => new ObjectId(id)) },
       };
-      const deleted = await cartCollection.deleteMany(query);
-      res.send({ inserted, deleted });
+      const deleted = await cartCollection.deleteMany(deleteQuery);
+
+      const updatedQuery = {
+        _id: { $in: payment.classes_ids.map((id) => new ObjectId(id)) },
+      };
+
+      const updatedDoc = {
+        $push: {
+          students: payment.email,
+        },
+      };
+
+      const updated = await classCollection.updateMany(
+        updatedQuery,
+        updatedDoc
+      );
+
+      res.send({ inserted, deleted, updated });
     });
 
     // Seat Patch
