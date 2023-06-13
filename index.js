@@ -103,7 +103,7 @@ async function run() {
     };
 
     // check admin
-    app.get("/user/admin/:email", verifyJWT, verifyAdmin, async (req, res) => {
+    app.get("/user/admin/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
 
       if (req.decoded.email !== email) {
@@ -116,41 +116,31 @@ async function run() {
       res.send(result);
     });
     // check instructor
-    app.get(
-      "/user/instructor/:email",
-      verifyJWT,
-      verifyInstructor,
-      async (req, res) => {
-        const email = req.params.email;
+    app.get("/user/instructor/:email", verifyJWT, async (req, res) => {
+      const email = req.params.email;
 
-        if (req.decoded.email !== email) {
-          res.send({ instructor: false });
-        }
-
-        const query = { email: email };
-        const user = await userCollection.findOne(query);
-        const result = { instructor: user?.role === "instructor" };
-        res.send(result);
+      if (req.decoded.email !== email) {
+        res.send({ instructor: false });
       }
-    );
+
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      const result = { instructor: user?.role === "instructor" };
+      res.send(result);
+    });
     // check student
-    app.get(
-      "/user/student/:email",
-      verifyJWT,
-      verifyStudent,
-      async (req, res) => {
-        const email = req.params.email;
+    app.get("/user/student/:email", verifyJWT, async (req, res) => {
+      const email = req.params.email;
 
-        if (req.decoded.email !== email) {
-          res.send({ student: false });
-        }
-
-        const query = { email: email };
-        const user = await userCollection.findOne(query);
-        const result = { student: user?.role === "student" };
-        res.send(result);
+      if (req.decoded.email !== email) {
+        res.send({ student: false });
       }
-    );
+
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      const result = { student: user?.role === "student" };
+      res.send(result);
+    });
 
     //Getting data from db
     app.get("/instructors", async (req, res) => {
@@ -190,7 +180,7 @@ async function run() {
     );
 
     //Getting all classes
-    app.get("/admin/classes", async (req, res) => {
+    app.get("/admin/classes", verifyJWT, verifyAdmin, async (req, res) => {
       let sortby = { _id: -1 };
       const result = await classCollection.find().sort(sortby).toArray();
       res.send(result);
@@ -273,7 +263,7 @@ async function run() {
     );
 
     // User Upload
-    app.post("/users", verifyJWT, async (req, res) => {
+    app.post("/users", async (req, res) => {
       const user = req.body;
       const query = { email: user.email };
       let existingUser = await userCollection.findOne(query);
@@ -291,6 +281,14 @@ async function run() {
       if (req.decoded.email !== email) {
         res.send({ admin: false });
       }
+      res.send(result);
+    });
+
+    //Get Users Roles For Logged In User
+    app.get("/users/role/:email", async (req, res) => {
+      const query = { email: req.params.email };
+      const option = { projection: { role: 1 } };
+      const result = await userCollection.findOne(query, option);
       res.send(result);
     });
 
@@ -321,7 +319,7 @@ async function run() {
     });
 
     //Get cart
-    app.get("/cart", verifyJWT, verifyStudent, async (req, res) => {
+    app.get("/cart", async (req, res) => {
       const email = req.query.email;
       if (!email) {
         res.send([]);
