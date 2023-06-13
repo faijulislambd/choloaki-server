@@ -420,6 +420,19 @@ async function run() {
       res.send(result);
     });
 
+    //Get Enrolled Classes
+    app.get(
+      "/classes/enrolled/:email",
+      verifyJWT,
+      verifyStudent,
+      async (req, res) => {
+        const email = req.params.email;
+        const query = { students: { $elemMatch: { $eq: email } } };
+        const result = await classCollection.find(query).toArray();
+        res.send(result);
+      }
+    );
+
     // delete Class
     app.delete("/teacher/class/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
