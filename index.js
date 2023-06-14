@@ -454,6 +454,66 @@ async function run() {
       }
     });
 
+    // Admin Stats
+    app.get("/admin/stats", verifyJWT, verifyAdmin, async (req, res) => {
+      const studentQuery = { role: "student" };
+      const instructorQuery = { role: "instructor" };
+      const students = await userCollection.countDocuments(studentQuery);
+      const instructors = await userCollection.countDocuments(instructorQuery);
+      const classes = await classCollection.countDocuments();
+      const payment = await paymentsCollection.find().toArray();
+      const totalIncome = payment.reduce((sum, item) => item.price + sum, 0);
+      res.send({ students, instructors, classes, totalIncome });
+    });
+
+    // Instructor Stats
+    app.get(
+      "/instructor/stats/:email",
+      verifyJWT,
+      verifyInstructor,
+      async (req, res) => {
+        const email = req.params.email;
+        const query = { instructor_email: email };
+        const approveQuery = {
+          $and: [{ instructor_email: email }, { status: "approved" }],
+        };
+        const deniedQuery = {
+          $and: [{ instructor_email: email }, { status: "denied" }],
+        };
+        const pendingQuery = {
+          $and: [{ instructor_email: email }, { status: "pending" }],
+        };
+        const classes = await classCollection.countDocuments(query);
+        const approved = await classCollection.countDocuments(approveQuery);
+        const denied = await classCollection.countDocuments(deniedQuery);
+        const pending = await classCollection.countDocuments(pendingQuery);
+        const students = await classCollection.find(query).toArray();
+        const enrolledStudents = students.reduce(
+          (sum, student) => student.students.length + sum,
+          0
+        );
+        res.send({ classes, enrolledStudents, approved, denied, pending });
+      }
+    );
+
+    // Student Stats
+    app.get(
+      "/student/stats/:email",
+      verifyJWT,
+      verifyStudent,
+      async (req, res) => {
+        const email = req.params.email;
+        const query = { email: email };
+        const enrolledQuery = { students: { $elemMatch: { $eq: email } } };
+        const enrolledClasses = await classCollection.countDocuments(
+          enrolledQuery
+        );
+        const payment = await paymentsCollection.find(query).toArray();
+        const totalSpent = payment.reduce((sum, item) => item.price + sum, 0);
+        res.send({ enrolledClasses, totalSpent });
+      }
+    );
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
