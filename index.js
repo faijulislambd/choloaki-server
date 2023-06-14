@@ -286,7 +286,7 @@ async function run() {
     });
 
     //Get Users Roles For Logged In User
-    app.get("/users/role/:email", async (req, res) => {
+    app.get("/users/role/:email", verifyJWT, async (req, res) => {
       const query = { email: req.params.email };
       const option = { projection: { role: 1 } };
       const result = await userCollection.findOne(query, option);
@@ -295,7 +295,7 @@ async function run() {
 
     //Users Role Change
     app.patch(
-      "admin/users/role/:id",
+      "/admin/users/role/:id",
       verifyJWT,
       verifyAdmin,
       async (req, res) => {
