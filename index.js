@@ -392,7 +392,10 @@ async function run() {
     app.get("/payments/:email", verifyJWT, verifyStudent, async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
-      const result = await paymentsCollection.find(query).toArray();
+      const result = await paymentsCollection
+        .find(query)
+        .sort({ _id: -1 })
+        .toArray();
       res.send(result);
     });
 
@@ -462,7 +465,8 @@ async function run() {
       const instructors = await userCollection.countDocuments(instructorQuery);
       const classes = await classCollection.countDocuments();
       const payment = await paymentsCollection.find().toArray();
-      const totalIncome = payment.reduce((sum, item) => item.price + sum, 0);
+      const totalIncomeRaw = payment.reduce((sum, item) => item.price + sum, 0);
+      const totalIncome = parseFloat(totalIncomeRaw.toFixed(2));
       res.send({ students, instructors, classes, totalIncome });
     });
 
